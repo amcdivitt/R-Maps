@@ -1,0 +1,126 @@
+---
+title: "Mapping 2"
+author: "Clio3"
+date: "October 7, 2014"
+output: html_document
+---
+```{r}
+library(sp)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(ggmap)
+library(ggplot2)
+```
+
+```{r}
+map_sp <- readOGR("/Users/rikku8221/Desktop/Mapping/nhgis-shp/","state_1860")
+plot(map_sp)
+title("Map of United States")
+class(map_sp)
+```
+Since I wasn't sure what to map first, I began with places that I have lived over the years. These are listed below in the cities dataframe.
+```{r}
+cities <- data.frame(name = c("Dyersburg,TN",
+                    "Murfreesboro,TN",
+                    "Lake Mary, FL",
+                    "Oviedo, FL",
+                    "Alexandria, VA"),
+           stringsAsFactors = FALSE)
+```
+Now we can get the geocodes for these cities.
+```{r}
+cities_geocoded <- geocode(cities$name)
+cities <- cbind(cities, cities_geocoded)
+ggplot(cities, aes(x = lon, y = lat)) +
+  geom_point() +
+  geom_text(aes(label = name), vjust = -1) +
+  coord_map()
+```
+
+```{r}
+map_df <- fortify(map_sp, region = "GISJOIN")
+map_1860 <- ggplot() + 
+  geom_map(data = map_df,
+           map = map_df,
+           aes(x = long, y = lat, group = group, map_id = id),
+           fill = "white",
+           color = "black",
+           size = 0.2) +
+  coord_map() +
+  theme_minimal()
+
+map_1860
+map_1860 +
+  geom_point(data = cities, aes(x = lon, y = lat),
+             color = "blue", size = 3) +
+  geom_text(data = cities, aes(x = lon, y = lat, label = name),
+            vjust = -1)
+```
+Now I'm going to map the cities where I lived on an actual map!
+```{r}
+map_1860 +
+  geom_point(data = cities,
+             aes(x = lon, y = lat, size = 1),
+             color = "blue", shape = 1) +
+  theme(legend.position = "bottom") +
+  scale_size(range = c(2, 8)) + 
+  ggtitle("Cities Where Anne Lived")
+```
+This one shows the density of where I lived, rather than just locations.
+```{r}
+map_1860 +
+  geom_density2d(data = cities,
+             aes(x = lon, y = lat)) +
+  theme(legend.position = "bottom") +
+  ggtitle("Cities Where Anne Lived")
+```
+Now that I have figured it out with relatively meaningless information, I decided to map some of the early game development hotspots in the United States. Although the map is old, and it does not have all of the states, it gives an idea of where they were.
+```{r}
+cities <- data.frame(name = c("Cambridge, MA",
+                    "Salt Lake City, UT",
+                    "Sunnyvale, CA",
+                    "Nashua, NH"),
+           stringsAsFactors = FALSE)
+```
+
+```{r}
+cities_geocoded <- geocode(cities$name)
+cities <- cbind(cities, cities_geocoded)
+ggplot(cities, aes(x = lon, y = lat)) +
+  geom_point() +
+  geom_text(aes(label = name), vjust = -1) +
+  coord_map()
+```
+
+```{r}
+```{r}
+map_df <- fortify(map_sp, region = "GISJOIN")
+map_1860 <- ggplot() + 
+  geom_map(data = map_df,
+           map = map_df,
+           aes(x = long, y = lat, group = group, map_id = id),
+           fill = "white",
+           color = "black",
+           size = 0.2) +
+  coord_map() +
+  theme_minimal()
+
+map_1860
+map_1860 +
+  geom_point(data = cities, aes(x = lon, y = lat),
+             color = "red", size = 3) +
+  geom_text(data = cities, aes(x = lon, y = lat, label = name),
+            vjust = -1)
+```
+
+```{r}
+map_1860 +
+  geom_point(data = cities,
+             aes(x = lon, y = lat, size = 1),
+             color = "red", shape = 1) +
+  theme(legend.position = "bottom") +
+  scale_size(range = c(2, 8)) + 
+  ggtitle("Early Game Development")
+```
+
